@@ -73,11 +73,34 @@
         (fn [s] (new-stamp (s 0) (s 1) (s 2) (s 3))) 
         ss))))
 
-(def f (file/open "test.txt" :r))
-(def ss (file/read f :all))
-(peg/match stamp-file-peg ss)
-(file/close f)
-(file->stamps "test.txt")
+(def default-stamps-file ".stamps.txt")
+(def flags-spec [:file {:kind :flag 
+   :short "-f" 
+   :long "--file" 
+  :help "The file to read/write stamps from/to."
+   :required false 
+   :default default-stamps-file}])
+
+(defn parse-args [args]
+  (match args 
+    ["start" project tag] (stamp-now :start project tag)
+    ["stop"  project tag] (stamp-now :stop project tag)
+    ["start" project] (stamp-now :start project)
+    ["stop"  project] (stamp-now :stop project)
+    ["start"] (stamp-now :start)
+    ["stop"] (stamp-now :stop)
+    ["list"] (file->stamps default-stamps-file)
+    _ nil))
+
+# TODO: Parse the args and let 'er rip.
+# Might want to add a return value to file->stamps if it
+# doesn't have one so you can check if the file was read.
+# Also, you'll have to read the file to write it with the
+# way you've written things. Either change that or bite 
+# the bullet and do it.
 
 (defn main [args] 
   (print "Hello, World!"))
+
+(import spork/argparse)
+(argparse/argparse)
