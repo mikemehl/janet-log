@@ -63,54 +63,22 @@
 (defn stamps->timestamps [ss]
   (map (fn [s] (s :timestamp)) ss))
 
-(defn stamps->proj-set [ss]
-  (let [proj-set @{}]
-    (reduce (fn [ps s] (put ps (s :project) true))
-      proj-set ss)))
+(defn stamps->project-tags [ss]
+  (sort (map (fn [s] {:project (s :project) :tag (s :tag)}) ss)))
 
-(defn stamp->pt-set-key [s]
-  (string (s :project) "|" (s :tag)))
+(defn sort-stamps [ss]
+  (sort-by (fn [s] (get s :timestamp)) ss))
 
-(defn stamps->pt-set [ss]
-  (reduce (fn [pts s]
-           (put pts (stamp->pt-set-key s) (array)))
-          @{} ss))
+(defn stamps->project-map [ss]
+  "Convert a list of timestamps to a nested map. Index by project, then by tag."
+  (var pm @{})
+  (each s ss
+    (do
+      (def pkey (get s :project))
+      (def tkey (get s :tag))
+      (unless (get pm pkey) (put pm pkey @{}))
+      (unless (get (pm pkey) tkey) (put (pm pkey) tkey @[]))
+      (array/push ((pm pkey) tkey) s)))
+  pm)
 
-(defn pt-set-mark-stamp [pts s]
-  (let [key (stamp->pt-set-key s)
-        start-stop (s :start-stop)]
-    (if (= start-stop :start)
-      (array/push (pts key) true)
-      (array/pop (pts key)))
-    pts))
-
-(defn balanced? [ss]
-  "Returns true if starts and stops are balanced for every project-tag pair"
-  (let [pts (stamps->pt-set ss)]
-    (reduce 
-      (fn [pt-set s] 
-        (if (pt-set-mark-stamp pts s) pts false))
-      pts ss))) 
-         
-        
-(def pts (stamps->pt-set ss))
-(pt-set-mark-stamp pts a)
-(balanced? ss)
-        
-  
-          
-(empty? (values @{:a @[true]})) 
-
-
-(def thing @{:hello @[]})
-(array/pop (thing :hello))
-
-(def pts @{})
-(def a (stamp-now :start))
-(def b (stamp-now :stop))
-(def c (stamp-now :start))
-(def d (stamp-now :stop))
-(def e (stamp-now :stop))
-(def ss [a b c d])
-
-(pp (balanced? ss))
+(stamps->project-map ss)

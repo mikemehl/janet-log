@@ -1,4 +1,5 @@
 (import ./stamps)
+(def default-stamps-file ".stamps.txt")
 
 (defn stamp->file [s f]
   (when (stamps/stamp? s)
@@ -15,7 +16,7 @@
 (defn stamps->file [ss fname]
   "Write the stamps to a file. Overwrites the file."
   (let [f (create-or-open-file fname :w)]
-    (map (fn [s] (stamp->file s f)) ss)
+    (map (fn [s] (stamp->file s f)) (stamps/sort-stamps ss))
     (file/flush f)
     (file/close f)))
 
@@ -25,8 +26,7 @@
         ss (stamps/string->stamps fstr)]
     (file/close f)
     (when ss
-      (map 
-        (fn [s] (stamps/new-stamp (s 0) (s 1) (s 2) (s 3))) 
-        ss))))
+      (stamps/sort-stamps (map 
+                           (fn [s] (stamps/new-stamp (s 0) (s 1) (s 2) (s 3))) 
+                           ss)))))
 
-(def default-stamps-file ".stamps.txt")
