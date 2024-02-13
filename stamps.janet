@@ -7,27 +7,27 @@
     :tag tag
     :start-stop start-stop})
 
-(defn stamp-now [start-stop &opt project tag] 
+(defn stamp-now [start-stop &opt project tag]
   @{:timestamp (os/time)
     :project (if project project "default")
     :tag (if tag tag "default")
-    :start-stop (match start-stop 
-                 :start :start
-                 :stop :stop
-                 _ nil)})
+    :start-stop (match start-stop
+                  :start :start
+                  :stop :stop
+                  _ nil)})
 
 (defn stamp? [s]
-  (all? (map (fn [( k v )] -> 
-              (match k
-                :timestamp (number? v)
-                :project (string? v)
-                :tag (string? v)
-                :start-stop 
-                  (match v
-                    :start true
-                    :stop true
-                    _ false))) 
-         (pairs s))))
+  (all? (map (fn [(k v)] ->
+               (match k
+                 :timestamp (number? v)
+                 :project (string? v)
+                 :tag (string? v)
+                 :start-stop
+                 (match v
+                   :start true
+                   :stop true
+                   _ false)))
+             (pairs s))))
 
 (defn stamp->string [s]
   (if (stamp? s)
@@ -36,15 +36,14 @@
 (def timestamp-capture '(<- :d+))
 (def string-capture '(<- (some (+ :w "_" "-"))))
 (def start-stop-capture '(<- (choice "start" "stop")))
-(def stamp-file-grammar 
-  ~{ 
-    :main (some (* :entry "\n"))
+(def stamp-file-grammar
+  ~{:main (some (* :entry "\n"))
     :entry (group (* :timestamp "|" :project "|" :tag "|" :start-stop))
     :timestamp ,timestamp-capture
     :project ,string-capture
     :tag ,string-capture
     :start-stop ,start-stop-capture})
-    
+
 
 (def stamp-file-peg (peg/compile stamp-file-grammar))
 
@@ -80,5 +79,3 @@
       (unless (get (pm pkey) tkey) (put (pm pkey) tkey @[]))
       (array/push ((pm pkey) tkey) s)))
   pm)
-
-(stamps->project-map ss)
