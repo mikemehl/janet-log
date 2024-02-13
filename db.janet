@@ -37,3 +37,6 @@
   (let [f (or (file/open default-db :wb) (os/open default-db :c :w))]
     (file/write f (marshal stamp-db))
     (file/close f)))
+
+(defn dump [] 
+  (pp stamp-db))
