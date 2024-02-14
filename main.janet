@@ -1,3 +1,4 @@
+#!/usr/bin/env janet
 (import ./stamps)
 (import ./db)
 (import spork/argparse)
