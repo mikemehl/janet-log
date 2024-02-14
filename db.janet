@@ -32,7 +32,6 @@
         (array/push current-stamps (last (get (get stamp-db p) t)))))
     current-stamps))
 
-
 (defn clear []
   (set stamp-db @{}))
 

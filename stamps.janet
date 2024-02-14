@@ -31,7 +31,8 @@
 
 (defn stamp->string [s]
   (if (stamp? s)
-    (string (s :timestamp) "|" (s :project) "|" (s :tag) "|" (s :start-stop))))
+    (string (os/strftime "%Y-%m-%d @ %H:%M:%S" (s :timestamp) true) 
+            "|" (s :project) "|" (s :tag) "|" (s :start-stop))))
 
 (def timestamp-capture '(<- :d+))
 (def string-capture '(<- (some (+ :w "_" "-"))))
