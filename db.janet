@@ -23,6 +23,16 @@
         (if t t false))
       false)))
 
+(defn projects [] (keys stamp-db))
+
+(defn current []
+  (let [current-stamps @[]]
+    (loop [p :keys stamp-db]
+      (loop [t :keys (get stamp-db p)]
+        (array/push current-stamps (last (get (get stamp-db p) t)))))
+    current-stamps))
+
+
 (defn clear []
   (set stamp-db @{}))
 
@@ -38,5 +48,10 @@
     (file/write f (marshal stamp-db))
     (file/close f)))
 
-(defn dump [] 
-  (pp stamp-db))
+(defn dump []
+  (loop [p :keys stamp-db]
+    (let [proj (get stamp-db p)]
+      (loop [t :keys proj]
+        (each stamp (get proj t)
+          (print (stamps/stamp->string stamp))))))
+  true)
